@@ -9,7 +9,7 @@ Un frontend React/Vite avec :
 - Routage React Router avec AuthGuard pour protéger les routes.
 - Un Sidebar responsive et prêt à l'emploi (avec liens conditionnels basés sur l'auth).
 - Gestion des tokens, login/logout, et refresh automatique.
-
+- Store redux pour les données de l'utilisateur connecté.
 - Un backend Keycloak en Docker, avec une base de données PostgreSQL dédiée et isolée.
 - Orchestration via Docker Compose pour un démarrage rapide en dev.
 
