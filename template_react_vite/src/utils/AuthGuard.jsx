@@ -1,9 +1,11 @@
 import { useEffect } from 'react'
 import { useKeycloak } from '@react-keycloak/web'
+import { setUUID } from '../domains/Authentification/slice'
+import { useDispatch } from 'react-redux';
 
 function AuthGuard({ children, requiredRole }) {
   const { keycloak, initialized } = useKeycloak()
-
+  const dispatch = useDispatch();
   useEffect(() => {
     if (initialized && !keycloak.authenticated) {
       keycloak.login()
@@ -15,7 +17,7 @@ function AuthGuard({ children, requiredRole }) {
         if (refreshed) {
           console.log('Token rafraîchi pour sync rôles')
         }
-
+        dispatch(setUUID(keycloak.subject));
         console.log('Utilisateur authentifié avec succès', keycloak.tokenParsed, 'UUID:', keycloak.subject, 'Rôles Realm:', keycloak.realmAccess?.roles)
       }).catch(err => console.error('Erreur refresh token:', err))
     }
