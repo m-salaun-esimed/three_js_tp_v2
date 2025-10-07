@@ -1,11 +1,12 @@
 import { useEffect } from 'react'
 import { useKeycloak } from '@react-keycloak/web'
-import { setUUID } from '../domains/Authentification/slice'
+import { setUUID, setEmail, setUsername, setFirstName, setLastName } from '../domains/Authentification/slice'
 import { useDispatch } from 'react-redux';
 
 function AuthGuard({ children, requiredRole }) {
   const { keycloak, initialized } = useKeycloak()
   const dispatch = useDispatch();
+  
   useEffect(() => {
     if (initialized && !keycloak.authenticated) {
       keycloak.login()
@@ -17,11 +18,23 @@ function AuthGuard({ children, requiredRole }) {
         if (refreshed) {
           console.log('Token rafraîchi pour sync rôles')
         }
+        
+        const tokenParsed = keycloak.tokenParsed;
+        const username = tokenParsed?.preferred_username;
+        const email = tokenParsed?.email;
+        const firstName = tokenParsed?.given_name;
+        const lastName = tokenParsed?.family_name;
+        
         dispatch(setUUID(keycloak.subject));
-        console.log('Utilisateur authentifié avec succès', keycloak.tokenParsed, 'UUID:', keycloak.subject, 'Rôles Realm:', keycloak.realmAccess?.roles)
+        dispatch(setUsername(username));
+        dispatch(setEmail(email));
+        dispatch(setFirstName(firstName));
+        dispatch(setLastName(lastName));
+        
+        console.log('Utilisateur authentifié avec succès', tokenParsed, 'UUID:', keycloak.subject)
       }).catch(err => console.error('Erreur refresh token:', err))
     }
-  }, [initialized, keycloak.authenticated, keycloak.updateToken])
+  }, [initialized, keycloak.authenticated, keycloak.updateToken, dispatch])
 
   if (!initialized) {
     return <div>Initialisation en cours...</div>
