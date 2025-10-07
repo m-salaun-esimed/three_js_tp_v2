@@ -1,9 +1,9 @@
 import Keycloak from 'keycloak-js'
 
 const keycloak = new Keycloak({
-  url: 'https://localhost:8443',
-  realm: 'Fanlab',
-  clientId: 'template_react_vite',
+  url: import.meta.env.VITE_KEYCLOAK_URL,
+  realm: import.meta.env.VITE_KEYCLOAK_REALM,
+  clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
 })
 
 keycloak.onReady = () => console.log('Keycloak prêt')
