@@ -1,0 +1,44 @@
+import { useEffect } from 'react'
+import { useKeycloak } from '@react-keycloak/web'
+
+function AuthGuard({ children, requiredRole }) {
+  const { keycloak, initialized } = useKeycloak()
+
+  useEffect(() => {
+    if (initialized && !keycloak.authenticated) {
+      keycloak.login()
+      return
+    }
+
+    if (initialized && keycloak.authenticated) {
+      keycloak.updateToken(0).then((refreshed) => {
+        if (refreshed) {
+          console.log('Token rafraîchi pour sync rôles')
+        }
+
+        console.log('Utilisateur authentifié avec succès', keycloak.tokenParsed, 'UUID:', keycloak.subject, 'Rôles Realm:', keycloak.realmAccess?.roles)
+      }).catch(err => console.error('Erreur refresh token:', err))
+    }
+  }, [initialized, keycloak.authenticated, keycloak.updateToken])
+
+  if (!initialized) {
+    return <div>Initialisation en cours...</div>
+  }
+
+  if (!keycloak.authenticated) {
+    return null
+  }
+
+  if (requiredRole) {
+    const hasRole = keycloak.hasRealmRole(requiredRole) ||
+      keycloak.hasResourceRole(requiredRole, 'portal') ||
+      (keycloak.tokenParsed.resource_access?.portal?.roles?.includes(requiredRole) || false)
+    if (!hasRole) {
+      return <div>Accès refusé : rôle requis {requiredRole}</div>
+    }
+  }
+
+  return children
+}
+
+export default AuthGuard

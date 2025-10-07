@@ -26,8 +26,8 @@ Idéal pour des apps SPAs sécurisées. Personnalisez facilement le nom du proje
 1. Clonez le repo :
 
 ```bash
-git clone <votre-repo-url>
-cd <nom-du-repo>
+git clone https://github.com/m-salaun-esimed/template_react_vite_keycloak.git
+cd template_react_vite_keycloak
 ```
 
 2. Renommez le dossier frontend (optionnel, pour personnaliser) :
@@ -50,8 +50,9 @@ cd <nom-du-repo>
     - Accédez à l'admin console. Avec admin/admin.
     - Créez un realm : "Fanlab".
     - Créez un client : ID template_react_vite (ou votre custom), type OpenID Connect, public (pas de secret), activez "Standard Flow".
-    - Ajoutez redirect URIs : http://localhost:5176/*.
-    - Web Origins : http://localhost:5176.
+    - Valid redirect URIs : http://localhost:5176/*.
+    - Ajoutez redirect URIs : http://localhost:5176/.
+    - Web Origins : +.
     - Créez un user test (ex. testuser / password).
 
 # Utilisation
