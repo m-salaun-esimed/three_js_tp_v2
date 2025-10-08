@@ -137,7 +137,7 @@ const Sidebar = () => {
               ) : (
                 <MdDarkMode className="w-5 h-5 mr-3" />
               )}
-              <span className="flex-1">{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
+              <span className="flex-1">{isDarkMode ? "Thème sombre" : "Thème clair"}</span>
               <Switch
                 checked={isDarkMode}
                 onCheckedChange={toggleDarkMode}
