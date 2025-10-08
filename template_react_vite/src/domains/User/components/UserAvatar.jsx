@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 function UserAvatar() {
   const { firstName, lastName, email, username } = useSelector((state) => state.auth);
@@ -38,12 +39,14 @@ function UserAvatar() {
       {/* Avatar */}
       <div
         ref={avatarRef}
-        className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold cursor-pointer hover:bg-blue-700 transition"
+        className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-black dark:text-white text-lg font-bold cursor-pointer hover:bg-blue-700 transition"
         onClick={handleClick}
       >
-        {firstLetter}
+        <Avatar>
+          <AvatarImage />
+          <AvatarFallback>{firstLetter}</AvatarFallback>
+        </Avatar>
       </div>
-
       {/* Menu déroulant */}
       {isOpen && (
         <div
@@ -56,14 +59,6 @@ function UserAvatar() {
             </p>
             <p className="text-sm text-gray-500">@{username || 'Non défini'}</p>
             <p className="text-sm text-gray-500">{email || 'Non défini'}</p>
-          </div>
-          <div className="border-t border-gray-200">
-            <button
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
-              onClick={() => setIsOpen(false)}
-            >
-              Déconnexion
-            </button>
           </div>
         </div>
       )}

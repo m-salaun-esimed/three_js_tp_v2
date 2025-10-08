@@ -1,8 +1,8 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import Home from './pages/Home'
-import Test from './pages/Test'
-import AuthGuard from './utils/AuthGuard'
-import Notifications from './pages/Notifications'
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Home from "./pages/Home";
+import Test from "./pages/Test";
+import AuthGuard from "./utils/AuthGuard";
+import Notifications from "./pages/Notifications";
 
 function App() {
   return (
@@ -34,7 +34,7 @@ function App() {
         />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

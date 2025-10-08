@@ -1,5 +1,7 @@
 import React, { Fragment } from 'react'
 import { useKeycloak } from '@react-keycloak/web'
+import { Button } from "@/components/ui/button"
+import { IoIosLogOut } from "react-icons/io";
 
 /**
  * Composant bouton de déconnexion avec Keycloak.
@@ -10,21 +12,22 @@ function LogOutKeycloak() {
 
   const logOut = () => {
     keycloak.logout({
-      redirectUri: window.location.origin + '/', 
+      redirectUri: window.location.origin + '/',
     })
   }
   return (
     <Fragment>
-      <div className='ms-3'>
-        <button
+      <div className="flex flex-row items-center justify-start gap-2 p-2">
+        <IoIosLogOut size={24} className="text-gray-600 dark:text-gray-200" />
+        <Button
           onClick={logOut}
           disabled={!keycloak.authenticated}
-          className="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 transition duration-200 disabled:opacity-50"
+          className=""
         >
           Déconnexion
-        </button>
+        </Button>
       </div>
-    </Fragment>
+    </Fragment >
   )
 }
 
