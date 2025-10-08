@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import Test from "./pages/Test";
 import AuthGuard from "./utils/AuthGuard";
 import Notifications from "./pages/Notifications";
+import About from "./pages/About";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             </AuthGuard>
           }
         />
+        <Route path="/about" element={<About />} />
       </Routes>
     </BrowserRouter>
   );
