@@ -5,21 +5,22 @@
 Ce template est une base prête à l'emploi pour développer une application React avec Vite, intégrant l'authentification via Keycloak (OIDC). Il inclut :
 
 Un frontend React/Vite avec :
+
 - Configuration Keycloak complète (instance, provider, context, et hooks pour l'auth).
 - Routage React Router avec AuthGuard pour protéger les routes.
 - Un Sidebar responsive et prêt à l'emploi (avec liens conditionnels basés sur l'auth).
 - Gestion des tokens, login/logout, et refresh automatique.
 - Store redux pour les données de l'utilisateur connecté.
-- Un backend Keycloak en Docker, avec une base de données PostgreSQL dédiée et isolée.
-- Orchestration via Docker Compose pour un démarrage rapide en dev.
+- Un backend Keycloak en Podman, avec une base de données PostgreSQL dédiée et isolée.
+- Orchestration via Podman Compose pour un démarrage rapide en dev.
 - ShadCN pré-installé
 
 Idéal pour des apps SPAs sécurisées. Personnalisez facilement le nom du projet, les realms/clients Keycloak, et intégrez votre logique métier.
 
 ## Prérequis
 
-- Docker et Docker Compose (v2+).
-- Node.js ≥ 18 (pour dev local sans Docker).
+- Podman et Podman Compose (v2+).
+- Node.js ≥ 18 (pour dev local sans Podman).
 - Un compte Git pour cloner/forker le repo.
 
 ## Installation Rapide
@@ -33,28 +34,30 @@ cd template_react_vite_keycloak
 
 2. Renommez le dossier frontend (optionnel, pour personnaliser) :
 
-    - Le dossier ./template_react_vite est le contexte de build. Pour le renommer (ex. my-app-frontend) :
-        - Mettez à jour docker-compose.yml : Changez context: ./template_react_vite en context: ./my-app-frontend et le volume ./template_react_vite:/app en ./my-app-frontend:/app.
-        - Changez le nom du service de template_react_vite à my-app-frontend si besoin.
+   - Le dossier ./template_react_vite est le contexte de build. Pour le renommer (ex. my-app-frontend) :
+     - Mettez à jour podman-compose.yml : Changez context: ./template_react_vite en context: ./my-app-frontend et le volume ./template_react_vite:/app en ./my-app-frontend:/app.
+     - Changez le nom du service de template_react_vite à my-app-frontend si besoin.
 
 3. Configurez le frontend :
-    - Changer les valeurs du .env
+
+   - Changer les valeurs du .env
 
 4. Démarrez le stack :
+
 ```bash
     cd .. # si dans dossier front
-    docker compose up --build -d
+    podman-compose up --build -d
 ```
 
 5. Configurez Keycloak (une seule fois) :
 
-    - Accédez à l'admin console. Avec admin/admin.
-    - Créez un realm : "Fanlab".
-    - Créez un client : ID template_react_vite (ou votre custom), type OpenID Connect, public (pas de secret), activez "Standard Flow".
-    - Valid redirect URIs : http://localhost:5176/*.
-    - Valid post logout redirect URIs  : http://localhost:5176/.
-    - Web Origins : +.
-    - Créez un user test (ex. testuser / password).
+   - Accédez à l'admin console. Avec admin/admin.
+   - Créez un realm : "Fanlab".
+   - Créez un client : ID template_react_vite (ou votre custom), type OpenID Connect, public (pas de secret), activez "Standard Flow".
+   - Valid redirect URIs : http://localhost:5176/\*.
+   - Valid post logout redirect URIs : http://localhost:5176/.
+   - Web Origins : +.
+   - Créez un user test (ex. testuser / password).
 
 # Utilisation
 
@@ -87,6 +90,7 @@ export const KeycloakProvider: FC<KeycloakProviderProps> = ({ children }) => {
   );
 };
 ```
+
 - Login : keycloak.login() (redirige vers Keycloak).
 - Logout : keycloak.logout() (clear tokens et redirect).
 
@@ -101,6 +105,7 @@ export const KeycloakProvider: FC<KeycloakProviderProps> = ({ children }) => {
 - Personnalisez les menus dans le fichier.
 
 ## ShadCN
+
 ### Présentation
 
 Ce projet utilise Shadcn/UI pour des composants d'interface utilisateur réutilisables, accessibles et personnalisables. Les composants Shadcn sont construits avec Tailwind CSS et Radix UI, garantissant un design moderne et responsive qui s'intègre parfaitement avec le basculement entre mode sombre et clair, ainsi qu'avec le thème global de l'application.
@@ -128,7 +133,6 @@ npx shadcn-ui@latest add switch
 - Ajoutez des styles personnalisés dans tailwind.config.js ou directement via les classes Tailwind au niveau des composants pour aligner avec votre charte graphique.
 
 - Effectuez des tests d'accessibilité avec des outils comme Lighthouse pour garantir la conformité.
-
 
 ## TypeScript
 
