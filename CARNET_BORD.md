@@ -1,2 +1,2 @@
 - 1.0.0 - feature/Readme -  - 
-- 1.1.0 - feature/aboutPage - -
+- 1.1.0 - feature/aboutPage - -- 1.1.0 - infra/podman-migration - passage en podman - 
