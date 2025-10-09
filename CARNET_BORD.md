@@ -2,3 +2,5 @@
 - 1.1.0 - feature/aboutPage -
 - 1.2.0 - infra/podman-migration - passage en podman -
 - 1.2.0 - develop -> main - release -
+- 1.3.0 - feature/notifications - notifications - 
+
