@@ -7,6 +7,7 @@ import { IoMdNotificationsOutline } from "react-icons/io";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { Switch } from "@/components/ui/switch";
 import LogOutKeycloak from "../domains/Authentification/components/LogOutKeycloak";
+import { FaInfoCircle } from "react-icons/fa";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -84,10 +85,9 @@ const Sidebar = () => {
               <NavLink
                 to="/"
                 className={({ isActive }) =>
-                  `flex items-center p-2 rounded-lg transition-all duration-200 group ${
-                    isActive
-                      ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
-                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  `flex items-center p-2 rounded-lg transition-all duration-200 group ${isActive
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`
                 }
                 onClick={() => setIsOpen(false)}
@@ -100,16 +100,30 @@ const Sidebar = () => {
               <NavLink
                 to="/test"
                 className={({ isActive }) =>
-                  `flex items-center p-2 rounded-lg transition-all duration-200 group ${
-                    isActive
-                      ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
-                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  `flex items-center p-2 rounded-lg transition-all duration-200 group ${isActive
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`
                 }
                 onClick={() => setIsOpen(false)}
               >
                 <FaRegFile className="w-5 h-5 transition-all duration-200" />
                 <span className="ml-3">Test</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/about"
+                className={({ isActive }) =>
+                  `flex items-center p-2 rounded-lg transition-all duration-200 group ${isActive
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  }`
+                }
+                onClick={() => setIsOpen(false)}
+              >
+                <FaInfoCircle className="w-5 h-5 transition-all duration-200" />
+                <span className="ml-3">Information</span>
               </NavLink>
             </li>
           </ul>
@@ -123,7 +137,7 @@ const Sidebar = () => {
               ) : (
                 <MdDarkMode className="w-5 h-5 mr-3" />
               )}
-              <span className="flex-1">{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
+              <span className="flex-1">{isDarkMode ? "Thème sombre" : "Thème clair"}</span>
               <Switch
                 checked={isDarkMode}
                 onCheckedChange={toggleDarkMode}
