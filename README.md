@@ -1,172 +1,204 @@
-# React + TS + Vite + Keycloak Template
+# Gaming Hub - React + Vite + Three.js
 
 ## Description
 
-Ce template est une base prête à l'emploi pour développer une application React avec Vite, intégrant l'authentification via Keycloak (OIDC). Il inclut :
+Plateforme de jeux web moderne construite avec React, Vite et Three.js. Ce hub de jeux propose une architecture modulaire permettant d'intégrer facilement de nouveaux jeux 2D et 3D.
 
-Un frontend React/Vite avec :
+### Fonctionnalités principales
 
-- Configuration Keycloak complète (instance, provider, context, et hooks pour l'auth).
-- Routage React Router avec AuthGuard pour protéger les routes.
-- Un Sidebar responsive et prêt à l'emploi (avec liens conditionnels basés sur l'auth).
-- Gestion des tokens, login/logout, et refresh automatique.
-- Store redux pour les données de l'utilisateur connecté.
-- Un backend Keycloak en Podman, avec une base de données PostgreSQL dédiée et isolée.
-- Orchestration via Podman Compose pour un démarrage rapide en dev.
-- ShadCN pré-installé
+- **Hub de jeux centralisé** - ArcZhitecture modulaire pour gérer plusieurs jeux
+- **Jeu 3D intégré** - Cheese Collector, un jeu de collection en 3D avec Three.js
+- **Mode sombre/clair** - Interface adaptative avec basculement de thème
+- **Design responsive** - Interface optimisée pour tous les écrans
+- **UI moderne** - Composants ShadCN/UI avec Tailwind CSS
+- **State management** - Redux pour la gestion d'état globale
 
-Idéal pour des apps SPAs sécurisées. Personnalisez facilement le nom du projet, les realms/clients Keycloak, et intégrez votre logique métier.
+## Jeux disponibles
+
+### Cheese Collector
+
+Un jeu 3D immersif où vous incarnez un chat affamé à la recherche de fromages !
+
+**Caractéristiques :**
+- Moteur 3D avec Three.js et WebGPU
+- Physique réaliste avec Cannon.js
+- Système de niveaux progressifs
+- Contrôles ZQSD + Souris
+- Interface de score en temps réel
+- Indicateurs visuels contextuels
+
+**Commandes :**
+- `ZQSD` - Déplacer le chat
+- `E` - Collecter un fromage (quand proche)
+- `Souris` - Regarder autour
+- `ESC` - Sortir du mode pointer lock
+
+## Structure du projet
+
+```
+template_react_vite_keycloak/
+├── template_react_vite/
+│   ├── public/
+│   │   ├── tp_three.js/          # Assets Three.js (models, textures, skybox)
+│   │   └── cat_game.png          # Thumbnail du jeu
+│   ├── src/
+│   │   ├── components/           # Composants réutilisables
+│   │   │   └── SideBar.tsx       # Navigation principale
+│   │   ├── features/             # Features de l'application
+│   │   │   └── game-library/     # Bibliothèque de jeux
+│   │   ├── games/                # Jeux intégrés
+│   │   │   ├── registry.ts       # Registre des jeux
+│   │   │   ├── shared/           # Composants partagés
+│   │   │   └── threejs-game/     # Cheese Collector
+│   │   │       ├── index.tsx     # Wrapper React
+│   │   │       └── utils/        # Logique du jeu
+│   │   ├── pages/                # Pages de l'application
+│   │   │   ├── Home.tsx          # Page d'accueil
+│   │   │   └── GamePage.tsx      # Page de jeu
+│   │   ├── types/                # Définitions TypeScript
+│   │   ├── stores/               # Redux stores
+│   │   └── main.tsx              # Point d'entrée
+│   └── package.json
+```
 
 ## Prérequis
 
-- Podman et Podman Compose (v2+).
-- Node.js ≥ 18 (pour dev local sans Podman).
-- Un compte Git pour cloner/forker le repo.
+- **Node.js** ≥ 18
+- **Git** pour cloner le repository
 
-## Installation Rapide
+## Installation
 
-1. Clonez le repo :
+### 1. Cloner le projet
 
 ```bash
-git clone https://github.com/m-salaun-esimed/template_react_vite_keycloak.git
-cd template_react_vite_keycloak
+git clone https://github.com/m-salaun-esimed/three_js_tp_v2.git
+cd three_js_tp_v2
 ```
 
-2. Renommez le dossier frontend (optionnel, pour personnaliser) :
-
-   - Le dossier ./template_react_vite est le contexte de build. Pour le renommer (ex. my-app-frontend) :
-     - Mettez à jour podman-compose.yml : Changez context: ./template_react_vite en context: ./my-app-frontend et le volume ./template_react_vite:/app en ./my-app-frontend:/app.
-     - Changez le nom du service de template_react_vite à my-app-frontend si besoin.
-
-3. Configurez le frontend :
-
-   - Changer les valeurs du .env
-
-4. Démarrez le stack :
+### 2. Installer les dépendances
 
 ```bash
-    cd .. # si dans dossier front
-    podman-compose up --build -d
+cd three_js_tp_v2
+npm install
 ```
 
-5. Configurez Keycloak (une seule fois) :
-
-   - Accédez à l'admin console. Avec admin/admin.
-   - Créez un realm : "Fanlab".
-   - Créez un client : ID template_react_vite (ou votre custom), type OpenID Connect, public (pas de secret), activez "Standard Flow".
-   - Valid redirect URIs : http://localhost:5176/\*.
-   - Valid post logout redirect URIs : http://localhost:5176/.
-   - Web Origins : +.
-   - Créez un user test (ex. testuser / password).
-
-# Utilisation
-
-## Authentification
-
-- L'app wrappe tout dans <KeycloakProvider> (dans main.jsx).
-- Utilisez les hooks du context Keycloak :
+### 3. Lancer l'application
 
 ```bash
-import { ReactKeycloakProvider } from "@react-keycloak/web";
-import keycloak from "../configs/keycloak";
-import { FC, ReactNode } from "react";
+cd template_react_vite
+npm run dev
+```
 
-interface KeycloakProviderProps {
-  children: ReactNode;
-}
+L'application sera accessible sur : http://localhost:5176
 
-export const KeycloakProvider: FC<KeycloakProviderProps> = ({ children }) => {
-  return (
-    <ReactKeycloakProvider
-      authClient={keycloak}
-      initOptions={{
-        onLoad: "check-sso",
-        pkceMethod: "S256",
-        checkLoginIframe: false,
-      }}
-    >
-      {children}
-    </ReactKeycloakProvider>
-  );
+## Architecture des jeux
+
+### Ajouter un nouveau jeu
+
+1. **Créer le dossier du jeu** dans `src/games/` :
+
+```bash
+src/games/mon-nouveau-jeu/
+├── index.tsx          # Composant React principal
+├── utils/             # Logique du jeu
+└── assets/            # Assets spécifiques (si besoin)
+```
+
+2. **Enregistrer le jeu** dans `src/games/registry.ts` :
+
+```typescript
+export const gamesRegistry: Record<string, GameMetadata> = {
+  'mon-nouveau-jeu': {
+    id: 'mon-nouveau-jeu',
+    name: 'Mon Nouveau Jeu',
+    description: 'Description du jeu...',
+    thumbnail: '/mon-jeu.png',
+    category: '2d', // ou '3d', 'puzzle', 'arcade'
+    minPlayers: 1,
+    maxPlayers: 1,
+    difficulty: 'easy',
+    tags: ['Action', 'Aventure'],
+  },
+};
+
+export const gameComponents = {
+  'mon-nouveau-jeu': lazy(() => import('./mon-nouveau-jeu')),
 };
 ```
 
-- Login : keycloak.login() (redirige vers Keycloak).
-- Logout : keycloak.logout() (clear tokens et redirect).
-
-## Routage avec AuthGuard
-
-- Routes protégées : Utilisez <AuthGuard> dans App.jsx ou routes :
-- Routes publiques : Pas de guard.
-
-## Sidebar
-
-- Composant prêt : <Sidebar /> dans components/Sidebar.jsx.
-- Personnalisez les menus dans le fichier.
-
-## ShadCN
-
-### Présentation
-
-Ce projet utilise Shadcn/UI pour des composants d'interface utilisateur réutilisables, accessibles et personnalisables. Les composants Shadcn sont construits avec Tailwind CSS et Radix UI, garantissant un design moderne et responsive qui s'intègre parfaitement avec le basculement entre mode sombre et clair, ainsi qu'avec le thème global de l'application.
-
-### Configuration
-
-Les composants Shadcn sont installés en tant que fichiers individuels dans le dossier src/components/ui/. Pour ajouter de nouveaux composants, utilisez la CLI Shadcn :
-
-```bash
-npx shadcn-ui@latest add [nom-du-composant]
-```
-
-Par exemple, pour ajouter le composant Switch utilisé dans la Sidebar pour le basculement entre mode sombre et clair :
-
-```bash
-npx shadcn-ui@latest add switch
-```
-
-### Bonnes pratiques
-
-- Utilisez les composants Shadcn pour garantir une cohérence visuelle dans l'application.
-
-- Testez les composants en modes sombre et clair pour vérifier leur cohérence visuelle.
-
-- Ajoutez des styles personnalisés dans tailwind.config.js ou directement via les classes Tailwind au niveau des composants pour aligner avec votre charte graphique.
-
-- Effectuez des tests d'accessibilité avec des outils comme Lighthouse pour garantir la conformité.
-
-## TypeScript
-
-### Présentation
-
-Ce projet utilise TypeScript pour assurer la sécurité des types, améliorer la maintenabilité du code et optimiser l'expérience des développeurs. TypeScript est configuré avec un mode strict pour détecter les erreurs potentielles tôt et appliquer les bonnes pratiques.
-
-### Configuration
-
-TypeScript est configuré via le fichier tsconfig.json à la racine du projet. Les paramètres clés incluent :
-
-- "strict": true pour un typage strict
-- "jsx": "react-jsx" pour la compatibilité avec React et Vite.
-- "module": "ESNext" et "target": "ESNext" pour utiliser les fonctionnalités modernes de JavaScript.
-
-### Utilisation
-
-- Types et interfaces : Définissez des types ou interfaces dans src/types/ pour les données de l'application, comme les props des composants ou les réponses d'API. Exemple :
+3. **Créer le composant** dans `index.tsx` :
 
 ```tsx
-interface User {
-  firstName: string;
-  lastName: string;
-  email: string;
-  username: string;
-}
-```
+import { useEffect, useRef } from 'react';
 
-- Composants : Utilisez TypeScript pour typer les composants React. Par exemple, dans Home.tsx :
+const MonNouveauJeu = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
 
-```tsx
-import React, { FC } from "react";
+  useEffect(() => {
+    return () => {
+    };
+  }, []);
 
-const Home: FC = () => {
-  // ...
+  return <div ref={containerRef} className="w-full h-screen" />;
 };
+
+export default MonNouveauJeu;
 ```
+
+### Composants partagés disponibles
+
+- **GameContainer** - Wrapper pour les jeux
+- **GameHeader** - En-tête avec score/niveau
+- **GameControls** - Contrôles de jeu (play/pause)
+- **useGameState** - Hook pour gérer l'état du jeu
+- **useGameScore** - Hook pour gérer le score avec localStorage
+
+## Technologies utilisées
+
+### Frontend
+- **React 18** - Bibliothèque UI
+- **TypeScript** - Typage statique
+- **Vite** - Build tool et dev server
+- **React Router** - Routing
+- **Redux Toolkit** - State management
+- **Tailwind CSS** - Styling utility-first
+- **ShadCN/UI** - Composants UI
+
+### Jeux 3D
+- **Three.js** - Moteur 3D
+- **WebGPU** - API graphique moderne
+- **Cannon.js** - Moteur physique
+- **lil-gui** - Interface de debug
+
+### Authentification
+- **Keycloak** - Identity and Access Management
+- **@react-keycloak/web** - Intégration React
+
+## Scripts disponibles
+
+```bash
+npm run dev              
+npx shadcn-ui@latest add [composant]
+```
+
+## Bonnes pratiques
+
+### Pour les jeux
+
+1. **Cleanup** - Toujours nettoyer les ressources dans `useEffect` return
+2. **Performance** - Utiliser `requestAnimationFrame` pour les animations
+3. **Assets** - Placer les assets dans `public/` pour un accès direct
+4. **TypeScript** - Définir les types dans `src/types/game.ts`
+5. **Lazy loading** - Charger les jeux de manière lazy pour optimiser le bundle
+
+### Pour le code
+
+1. **Composants** - Un composant par fichier
+2. **Hooks** - Extraire la logique complexe dans des hooks personnalisés
+3. **Types** - Toujours typer les props et les states
+4. **State** - Utiliser Redux pour l'état global, useState pour l'état local
+5. **Styling** - Privilégier Tailwind CSS et les composants ShadCN
+
+## Auteur
+
+**Matthieu Salaun** - [GitHub](https://github.com/m-salaun-esimed)
