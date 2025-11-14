@@ -9,7 +9,12 @@ export class GravityGame {
   private renderer: THREE.WebGLRenderer;
   private world: CANNON.World;
   private levelManager: LevelManager;
-
+  private isMouseDown = false;
+  private lastMouseX = 0;
+  private lastMouseY = 0;
+  private cameraAngleX = 0;
+  private cameraAngleY = 0;
+  private cameraDistance = 20;
   private ball: THREE.Mesh | null = null;
   private ballBody: CANNON.Body | null = null;
 
@@ -55,7 +60,10 @@ export class GravityGame {
 
     this.boundKeyDown = this.handleKeyDown.bind(this);
     window.addEventListener('keydown', this.boundKeyDown);
-
+    this.container.addEventListener('mousedown', this.onMouseDown);
+    this.container.addEventListener('mousemove', this.onMouseMove);
+    window.addEventListener('mouseup', this.onMouseUp);
+    this.container.addEventListener('wheel', this.onMouseWheel);
     this.animate();
 
     console.log('Gravity Puzzle initialized');
@@ -138,11 +146,8 @@ export class GravityGame {
       this.restartLevel();
       return;
     }
-    if (key === 'e'){
-      
-    }
 
-    let newGravity: 'up' | 'down' | 'left' | 'right' | null = null;
+    let newGravity: 'up' | 'down' | 'left' | 'right' | 'forward' | 'backward' | null = null;
 
     if (key === 'arrowup' || key === 'z') {
       newGravity = 'up';
@@ -152,6 +157,10 @@ export class GravityGame {
       newGravity = 'left';
     } else if (key === 'arrowright' || key === 'd') {
       newGravity = 'right';
+    } else if (key === 'a') {
+      newGravity = 'forward';
+    } else if (key === 'e') {
+      newGravity = 'backward';
     }
 
     if (newGravity && newGravity !== this.currentGravity) {
@@ -159,7 +168,8 @@ export class GravityGame {
     }
   }
 
-  private changeGravity(direction: 'up' | 'down' | 'left' | 'right') {
+
+  private changeGravity(direction: 'up' | 'down' | 'left' | 'right' | 'forward' | 'backward') {
     this.currentGravity = direction;
     this.moveCount++;
 
@@ -180,11 +190,15 @@ export class GravityGame {
       case 'right':
         this.world.gravity.set(10, 0, 0);
         break;
+      case 'forward':     // Z+
+        this.world.gravity.set(0, 0, 10);
+        break;
+      case 'backward':    // Z-
+        this.world.gravity.set(0, 0, -10);
+        break;
     }
-
-    // Animation de la caméra (optionnel, pour plus tard)
-    // this.animateCameraRotation(direction);
   }
+
 
   private checkWinCondition() {
     if (!this.ball || !this.ballBody) return;
@@ -199,7 +213,7 @@ export class GravityGame {
       Math.pow(ballPos.z - exitPos.z, 2)
     );
 
-    if (distance < 0.2) {
+    if (distance < 1) {
       console.log('Niveau complété !');
       if (this.onLevelComplete) {
         this.onLevelComplete();
@@ -234,11 +248,22 @@ export class GravityGame {
     }
 
     this.checkWinCondition();
+    const target = new THREE.Vector3(0, 0, 0);
 
+    const x = this.cameraDistance * Math.cos(this.cameraAngleY) * Math.sin(this.cameraAngleX);
+    const y = this.cameraDistance * Math.sin(this.cameraAngleY);
+    const z = this.cameraDistance * Math.cos(this.cameraAngleY) * Math.cos(this.cameraAngleX);
+
+    this.camera.position.set(x, y, z);
+    this.camera.lookAt(target);
     this.renderer.render(this.scene, this.camera);
   };
 
   public cleanup() {
+    this.container.removeEventListener('mousedown', this.onMouseDown);
+    this.container.removeEventListener('mousemove', this.onMouseMove);
+    window.removeEventListener('mouseup', this.onMouseUp);
+    this.container.removeEventListener('wheel', this.onMouseWheel);
     if (this._isCleanedUp) {
       console.log('Already cleaned up, skipping...');
       return;
@@ -274,4 +299,37 @@ export class GravityGame {
 
     console.log('Gravity Game cleaned up successfully');
   }
+
+  private onMouseDown = (e: MouseEvent) => {
+    this.isMouseDown = true;
+    this.lastMouseX = e.clientX;
+    this.lastMouseY = e.clientY;
+  };
+
+  private onMouseUp = () => {
+    this.isMouseDown = false;
+  };
+
+  private onMouseMove = (e: MouseEvent) => {
+    if (!this.isMouseDown) return;
+
+    const dx = e.clientX - this.lastMouseX;
+    const dy = e.clientY - this.lastMouseY;
+    this.lastMouseX = e.clientX;
+    this.lastMouseY = e.clientY;
+
+    const sensitivity = 0.005;
+
+    this.cameraAngleX -= dx * sensitivity;
+    this.cameraAngleY -= dy * sensitivity;
+
+    // Clamp vertical look
+    this.cameraAngleY = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, this.cameraAngleY));
+  };
+
+  private onMouseWheel = (e: WheelEvent) => {
+    this.cameraDistance += e.deltaY * 0.02;
+    this.cameraDistance = Math.max(5, Math.min(60, this.cameraDistance));
+  };
+
 }
