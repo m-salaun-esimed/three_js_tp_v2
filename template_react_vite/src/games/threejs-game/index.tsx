@@ -18,7 +18,6 @@ const CheeseCollectorGame = () => {
     setIsLoading(false);
 
     return () => {
-      // Cleanup au démontage du composant
       if (applicationRef.current) {
         applicationRef.current.cleanup();
         applicationRef.current = null;
@@ -26,7 +25,6 @@ const CheeseCollectorGame = () => {
     };
   }, []);
 
-  // Vérifier en continu si le joueur est proche d'un fromage
   useEffect(() => {
     if (!gameStarted || !applicationRef.current) return;
 
@@ -63,31 +61,24 @@ const CheeseCollectorGame = () => {
       applicationRef.current = app;
 
       if (app.cheeseCollector) {
-        // Initialiser le maxScore
         setMaxScore(app.cheeseCollector.getMaxScore());
         setScore(0);
 
-        // Sauvegarder les callbacks originaux
         const originalOnScoreUpdate = app.cheeseCollector.onScoreUpdate;
         const originalOnScoreComplete = app.cheeseCollector.onScoreComplete;
 
-        // Chaîner les callbacks pour mettre à jour React ET l'UI du jeu
         app.cheeseCollector.onScoreUpdate = (newScore: number, max: number) => {
-          // Appeler le callback original pour l'UI du jeu
           if (originalOnScoreUpdate) {
             originalOnScoreUpdate(newScore, max);
           }
-          // Mettre à jour le state React
           setScore(newScore);
           setMaxScore(max);
         };
 
         app.cheeseCollector.onScoreComplete = () => {
-          // Appeler le callback original
           if (originalOnScoreComplete) {
             originalOnScoreComplete();
           }
-          // Mettre à jour le state React
           setLevel(prev => prev + 1);
         };
       }
@@ -105,7 +96,6 @@ const CheeseCollectorGame = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
-     {/* Contenu du jeu */}
       <div className="flex-1 relative" ref={containerRef}>
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-50">

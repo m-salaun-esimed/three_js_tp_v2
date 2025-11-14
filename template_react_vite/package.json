@@ -24,6 +24,7 @@
     "@tailwindcss/vite": "^4.1.12",
     "@uiw/react-md-editor": "^3.9.3",
     "axios": "^1.8.4",
+    "cannon-es": "^0.20.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dompurify": "^3.2.7",
@@ -31,6 +32,7 @@
     "jwt-decode": "^4.0.0",
     "keycloak-js": "^26.2.0",
     "leaflet": "^1.9.4",
+    "lil-gui": "^0.21.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.483.0",
     "react": "^19.0.0",
@@ -45,10 +47,9 @@
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.12",
-    "toastify-ui": "^1.0.6",
-    "cannon-es": "^0.20.0",
-    "lil-gui": "^0.21.0",
-    "three": "^0.180.0"
+    "three": "^0.180.0",
+    "three-stdlib": "^2.36.1",
+    "toastify-ui": "^1.0.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
@@ -57,6 +58,7 @@
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@types/react-router-dom": "^5.3.3",
+    "@types/three": "^0.181.0",
     "@vitejs/plugin-react": "^5.0.4",
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",

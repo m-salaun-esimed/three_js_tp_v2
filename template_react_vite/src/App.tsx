@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import GamePage from "./pages/GamePage";
+import GravityPuzzleEditor from "./games/gravity-puzzle/GravityPuzzleEditor";
 
 function App() {
   return (
@@ -16,6 +17,12 @@ function App() {
           path="/game/:gameId"
           element={
               <GamePage />
+          }
+        />
+        <Route
+          path="/editor/gravity-puzzle"
+          element={
+              <GravityPuzzleEditor />
           }
         />
       </Routes>
