@@ -60,6 +60,21 @@ template_react_vite_keycloak/
 │   │   └── main.tsx              # Point d'entrée
 │   └── package.json
 ```
+### GravityPuzzle
+
+Un jeu 3D ou vous pouvez influencer la gravité sur une boulle, le but est de finir les puzzle le plus rapidement ! 
+
+**Caractéristiques :**
+- Moteur 3D avec Three.js et WebGPU
+- Physique réaliste avec Cannon.js
+- Système de niveaux progressifs
+- Contrôles zqsdae + Souris
+- Interface de score en temps réel : temps et nombre de mouvements
+
+**Commandes :**
+- `zqsdae` - Change la gravité
+- `R` - Recommencer le niveau
+- `Souris` - Regarder autour
 
 ## Prérequis
 
@@ -145,14 +160,6 @@ const MonNouveauJeu = () => {
 export default MonNouveauJeu;
 ```
 
-### Composants partagés disponibles
-
-- **GameContainer** - Wrapper pour les jeux
-- **GameHeader** - En-tête avec score/niveau
-- **GameControls** - Contrôles de jeu (play/pause)
-- **useGameState** - Hook pour gérer l'état du jeu
-- **useGameScore** - Hook pour gérer le score avec localStorage
-
 ## Technologies utilisées
 
 ### Frontend
@@ -170,34 +177,11 @@ export default MonNouveauJeu;
 - **Cannon.js** - Moteur physique
 - **lil-gui** - Interface de debug
 
-### Authentification
-- **Keycloak** - Identity and Access Management
-- **@react-keycloak/web** - Intégration React
-
 ## Scripts disponibles
 
 ```bash
 npm run dev              
-npx shadcn-ui@latest add [composant]
 ```
-
-## Bonnes pratiques
-
-### Pour les jeux
-
-1. **Cleanup** - Toujours nettoyer les ressources dans `useEffect` return
-2. **Performance** - Utiliser `requestAnimationFrame` pour les animations
-3. **Assets** - Placer les assets dans `public/` pour un accès direct
-4. **TypeScript** - Définir les types dans `src/types/game.ts`
-5. **Lazy loading** - Charger les jeux de manière lazy pour optimiser le bundle
-
-### Pour le code
-
-1. **Composants** - Un composant par fichier
-2. **Hooks** - Extraire la logique complexe dans des hooks personnalisés
-3. **Types** - Toujours typer les props et les states
-4. **State** - Utiliser Redux pour l'état global, useState pour l'état local
-5. **Styling** - Privilégier Tailwind CSS et les composants ShadCN
 
 ## Auteur
 
