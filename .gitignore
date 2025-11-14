@@ -1,2 +1,77 @@
-template_react_vite/package-lock.json
+# Dependencies
 template_react_vite/node_modules
+node_modules/
+**/node_modules/
+
+# Lockfiles
+template_react_vite/package-lock.json
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+template_react_vite/dist
+template_react_vite/build
+dist/
+build/
+.vite/
+*.local
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.parcel-cache/
+
+# OS files
+Thumbs.db
+.DS_Store
+*.bak
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Misc
+.turbo

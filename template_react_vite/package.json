@@ -45,7 +45,10 @@
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.12",
-    "toastify-ui": "^1.0.6"
+    "toastify-ui": "^1.0.6",
+    "cannon-es": "^0.20.0",
+    "lil-gui": "^0.21.0",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

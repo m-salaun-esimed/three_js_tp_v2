@@ -8,7 +8,6 @@ import { store } from "./stores/store";
 import ToastContainerUi from './utils/ToastContainerUi.jsx'
 
 createRoot(document.getElementById("root")!).render(
-  <KeycloakProvider>
     <StrictMode>
       <ToastContainerUi />
       <Provider store={store}>
@@ -16,5 +15,4 @@ createRoot(document.getElementById("root")!).render(
         <App />
       </Provider>
     </StrictMode>
-  </KeycloakProvider>
 );

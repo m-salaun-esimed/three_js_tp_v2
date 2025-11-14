@@ -1,9 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
-import Test from "./pages/Test";
-import AuthGuard from "./utils/AuthGuard";
-import Notifications from "./pages/Notifications";
-import About from "./pages/About";
+import GamePage from "./pages/GamePage";
 
 function App() {
   return (
@@ -12,28 +9,15 @@ function App() {
         <Route
           path="/"
           element={
-            <AuthGuard>
               <Home />
-            </AuthGuard>
           }
         />
         <Route
-          path="/test"
+          path="/game/:gameId"
           element={
-            <AuthGuard>
-              <Test />
-            </AuthGuard>
+              <GamePage />
           }
         />
-        <Route
-          path="/notifications"
-          element={
-            <AuthGuard>
-              <Notifications />
-            </AuthGuard>
-          }
-        />
-        <Route path="/about" element={<About />} />
       </Routes>
     </BrowserRouter>
   );
