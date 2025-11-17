@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
+import levelsData from '../levels/levels.json';
 
 interface LevelData {
   ballStart: { x: number; y: number; z: number };
@@ -8,6 +9,7 @@ interface LevelData {
     position: { x: number; y: number; z: number };
     size: { x: number; y: number; z: number };
   }>;
+  checkpoints?: Array<{ x: number; y: number; z: number }>;
 }
 
 export class LevelManager {
@@ -17,10 +19,14 @@ export class LevelManager {
   private levelObjects: THREE.Mesh[] = [];
   private levelBodies: CANNON.Body[] = [];
   private exitMesh: THREE.Mesh | null = null;
+  private levels: Record<number, LevelData>;
+  private checkpointMeshes: THREE.Mesh[] = [];
+  private checkpointLights: THREE.PointLight[] = [];
 
   constructor(scene: THREE.Scene, world: CANNON.World) {
     this.scene = scene;
     this.world = world;
+    this.levels = levelsData as Record<number, LevelData>;
   }
 
   public loadLevel(levelNumber: number): LevelData {
@@ -35,60 +41,17 @@ export class LevelManager {
 
     this.createExit(levelData.exit);
 
+    if (levelData.checkpoints) {
+      levelData.checkpoints.forEach(checkpoint => {
+        this.createCheckpoint(checkpoint);
+      });
+    }
+
     return levelData;
   }
 
   private getLevelData(levelNumber: number): LevelData {
-    const levels: Record<number, LevelData> = {
-      1: {
-        ballStart: { x: -5, y: 0, z: 0 },
-        exit: { x: 5, y: 0, z: 0 },
-        walls: [
-          { position: { x: 0, y: -1, z: 0 }, size: { x: 20, y: 1, z: 10 } },
-        ],
-      },
-      2: {
-        ballStart: { x: -5, y: 2, z: 0 },
-        exit: { x: 5, y: 2, z: 0 },
-        walls: [
-          { position: { x: 0, y: -1, z: 0 }, size: { x: 20, y: 1, z: 10 } },
-          { position: { x: 0, y: 2, z: 0 }, size: { x: 1, y: 5, z: 10 } }, 
-        ],
-      },
-      3: {
-        ballStart: { x: -6, y: 0, z: 0 },
-        exit: { x: 6, y: 6, z: 0 },
-        walls: [
-          { position: { x: -6, y: -1, z: 0 }, size: { x: 3, y: 1, z: 10 } }, 
-          { position: { x: -3, y: 0, z: 0 }, size: { x: 3, y: 1, z: 10 } }, 
-          { position: { x: 0, y: 1, z: 0 }, size: { x: 3, y: 1, z: 10 } },
-          { position: { x: 3, y: 2, z: 0 }, size: { x: 3, y: 1, z: 10 } },
-          { position: { x: 6, y: 5, z: 0 }, size: { x: 3, y: 1, z: 10 } },
-        ],
-      },
-      4: {
-        ballStart: { x: -7, y: 0, z: 0 },
-        exit: { x: 0, y: 5, z: 0 },
-        walls: [
-          { position: { x: -7, y: -1, z: 0 }, size: { x: 4, y: 1, z: 6 } },
-          { position: { x: -3, y: 2, z: 0 }, size: { x: 1, y: 8, z: 6 } },
-          { position: { x: 0, y: 4, z: 0 }, size: { x: 6, y: 1, z: 6 } },
-        ],
-      },
-      5: {
-        ballStart: { x: -8, y: 0, z: 0 },
-        exit: { x: 8, y: 0, z: 0 },
-        walls: [
-          { position: { x: -8, y: -1, z: 0 }, size: { x: 3, y: 1, z: 6 } },
-          { position: { x: -4, y: 2, z: 2 }, size: { x: 3, y: 1, z: 2 } },
-          { position: { x: 0, y: 0, z: 0 }, size: { x: 3, y: 1, z: 6 } },
-          { position: { x: 4, y: 2, z: -2 }, size: { x: 3, y: 1, z: 2 } },
-          { position: { x: 8, y: -1, z: 0 }, size: { x: 3, y: 1, z: 6 } },
-        ],
-      },
-    };
-
-    return levels[levelNumber] || levels[1];
+    return this.levels[levelNumber] || this.levels[1];
   }
 
   private createWall(
@@ -140,6 +103,31 @@ export class LevelManager {
     this.scene.add(light);
   }
 
+  private createCheckpoint(position: { x: number; y: number; z: number }) {
+    const geometry = new THREE.SphereGeometry(0.7, 32, 32);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xff0000,
+      emissive: 0xff0000,
+      emissiveIntensity: 0.5,
+      metalness: 0.3,
+      roughness: 0.4,
+      transparent: true,
+      opacity: 0.7,
+    });
+    const checkpoint = new THREE.Mesh(geometry, material);
+    checkpoint.position.set(position.x, position.y, position.z);
+    checkpoint.userData.activated = false;
+    checkpoint.userData.type = 'checkpoint';
+    this.scene.add(checkpoint);
+    this.checkpointMeshes.push(checkpoint);
+    this.levelObjects.push(checkpoint);
+
+    const light = new THREE.PointLight(0xff0000, 0.5, 10);
+    light.position.set(position.x, position.y, position.z);
+    this.scene.add(light);
+    this.checkpointLights.push(light);
+  }
+
   private clearLevel() {
     this.levelObjects.forEach(obj => {
       this.scene.remove(obj);
@@ -159,6 +147,12 @@ export class LevelManager {
     });
     this.levelBodies = [];
 
+    this.checkpointLights.forEach(light => {
+      this.scene.remove(light);
+    });
+    this.checkpointLights = [];
+    this.checkpointMeshes = [];
+
     this.exitMesh = null;
   }
 
@@ -173,5 +167,32 @@ export class LevelManager {
 
   public getCurrentLevel(): number {
     return this.currentLevel;
+  }
+
+  public getCheckpoints(): THREE.Mesh[] {
+    return this.checkpointMeshes;
+  }
+
+  public activateCheckpoint(index: number) {
+    if (index >= 0 && index < this.checkpointMeshes.length) {
+      const checkpoint = this.checkpointMeshes[index];
+      const light = this.checkpointLights[index];
+
+      if (!checkpoint.userData.activated) {
+        checkpoint.userData.activated = true;
+
+        // Change color to green
+        const material = checkpoint.material as THREE.MeshStandardMaterial;
+        material.color.setHex(0x00ff00);
+        material.emissive.setHex(0x00ff00);
+
+        light.color.setHex(0x00ff00);
+      }
+    }
+  }
+
+  public areAllCheckpointsActivated(): boolean {
+    if (this.checkpointMeshes.length === 0) return true;
+    return this.checkpointMeshes.every(cp => cp.userData.activated);
   }
 }

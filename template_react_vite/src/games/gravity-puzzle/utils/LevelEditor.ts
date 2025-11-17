@@ -12,6 +12,7 @@ interface EditorLevelData {
   ballStart: { x: number; y: number; z: number };
   exit: { x: number; y: number; z: number };
   walls: WallData[];
+  checkpoints?: Array<{ x: number; y: number; z: number }>;
 }
 
 export class LevelEditor {
@@ -24,10 +25,11 @@ export class LevelEditor {
   private walls: THREE.Mesh[] = [];
   private ballStartMarker: THREE.Mesh | null = null;
   private exitMarker: THREE.Mesh | null = null;
+  private checkpointMarkers: THREE.Mesh[] = [];
   private selectedObject: THREE.Mesh | null = null;
   private gridHelper: THREE.GridHelper;
 
-  private mode: 'wall' | 'spawn' | 'exit' | 'select' = 'select';
+  private mode: 'wall' | 'spawn' | 'exit' | 'checkpoint' | 'select' = 'select';
   private isPlacing: boolean = false;
   private placementPreview: THREE.Mesh | null = null;
   private previewHeight: number = 0;
@@ -63,7 +65,7 @@ export class LevelEditor {
     this.controls.update();
   }
 
-  public setMode(mode: 'wall' | 'spawn' | 'exit' | 'select') {
+  public setMode(mode: 'wall' | 'spawn' | 'exit' | 'checkpoint' | 'select') {
     this.mode = mode;
 
     if (this.placementPreview) {
@@ -77,6 +79,8 @@ export class LevelEditor {
       this.createSpawnPreview();
     } else if (mode === 'exit') {
       this.createExitPreview();
+    } else if (mode === 'checkpoint') {
+      this.createCheckpointPreview();
     }
 
     if (this.onModeChange) {
@@ -118,6 +122,20 @@ export class LevelEditor {
       transparent: true,
       opacity: 0.7,
       emissive: 0x00ff00,
+      emissiveIntensity: 0.5,
+    });
+    this.placementPreview = new THREE.Mesh(geometry, material);
+    this.placementPreview.visible = false;
+    this.scene.add(this.placementPreview);
+  }
+
+  private createCheckpointPreview() {
+    const geometry = new THREE.SphereGeometry(0.7, 32, 32);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xff0000,
+      transparent: true,
+      opacity: 0.7,
+      emissive: 0xff0000,
       emissiveIntensity: 0.5,
     });
     this.placementPreview = new THREE.Mesh(geometry, material);
@@ -176,6 +194,8 @@ export class LevelEditor {
       this.placeBallStart();
     } else if (this.mode === 'exit') {
       this.placeExit();
+    } else if (this.mode === 'checkpoint') {
+      this.placeCheckpoint();
     } else if (this.mode === 'select') {
       this.selectObject();
     }
@@ -259,11 +279,34 @@ export class LevelEditor {
     console.log('Exit placed at', this.exitMarker.position);
   }
 
+  private placeCheckpoint() {
+    if (!this.placementPreview) return;
+
+    const geometry = new THREE.SphereGeometry(0.7, 32, 32);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xff0000,
+      emissive: 0xff0000,
+      emissiveIntensity: 0.5,
+      metalness: 0.3,
+      roughness: 0.4,
+      transparent: true,
+      opacity: 0.7,
+    });
+    const checkpoint = new THREE.Mesh(geometry, material);
+    checkpoint.position.copy(this.placementPreview.position);
+    checkpoint.userData.type = 'checkpoint';
+
+    this.scene.add(checkpoint);
+    this.checkpointMarkers.push(checkpoint);
+
+    console.log('Checkpoint placed at', checkpoint.position);
+  }
+
   private selectObject() {
     console.log('selectObject called, mode:', this.mode);
     this.raycaster.setFromCamera(this.mouse, this.camera);
 
-    const selectableObjects = [...this.walls];
+    const selectableObjects = [...this.walls, ...this.checkpointMarkers];
     if (this.ballStartMarker) selectableObjects.push(this.ballStartMarker);
     if (this.exitMarker) selectableObjects.push(this.exitMarker);
 
@@ -342,6 +385,11 @@ export class LevelEditor {
       this.ballStartMarker = null;
     } else if (type === 'exit') {
       this.exitMarker = null;
+    } else if (type === 'checkpoint') {
+      const index = this.checkpointMarkers.indexOf(this.selectedObject);
+      if (index > -1) {
+        this.checkpointMarkers.splice(index, 1);
+      }
     }
 
     this.scene.remove(this.selectedObject);
@@ -555,6 +603,14 @@ export class LevelEditor {
       })),
     };
 
+    if (this.checkpointMarkers.length > 0) {
+      levelData.checkpoints = this.checkpointMarkers.map(checkpoint => ({
+        x: checkpoint.position.x,
+        y: checkpoint.position.y,
+        z: checkpoint.position.z,
+      }));
+    }
+
     console.log('Level exported:', levelData);
     return levelData;
   }
@@ -610,6 +666,26 @@ export class LevelEditor {
     this.exitMarker.userData.type = 'exit';
     this.scene.add(this.exitMarker);
 
+    if (levelData.checkpoints) {
+      levelData.checkpoints.forEach(checkpointData => {
+        const geometry = new THREE.SphereGeometry(0.7, 32, 32);
+        const material = new THREE.MeshStandardMaterial({
+          color: 0xff0000,
+          emissive: 0xff0000,
+          emissiveIntensity: 0.5,
+          metalness: 0.3,
+          roughness: 0.4,
+          transparent: true,
+          opacity: 0.7,
+        });
+        const checkpoint = new THREE.Mesh(geometry, material);
+        checkpoint.position.set(checkpointData.x, checkpointData.y, checkpointData.z);
+        checkpoint.userData.type = 'checkpoint';
+        this.scene.add(checkpoint);
+        this.checkpointMarkers.push(checkpoint);
+      });
+    }
+
     console.log('Level imported');
   }
 
@@ -626,6 +702,19 @@ export class LevelEditor {
       }
     });
     this.walls = [];
+
+    this.checkpointMarkers.forEach(checkpoint => {
+      this.scene.remove(checkpoint);
+      if (checkpoint.geometry) checkpoint.geometry.dispose();
+      if (checkpoint.material) {
+        if (Array.isArray(checkpoint.material)) {
+          checkpoint.material.forEach(mat => mat.dispose());
+        } else {
+          checkpoint.material.dispose();
+        }
+      }
+    });
+    this.checkpointMarkers = [];
 
     if (this.ballStartMarker) {
       this.scene.remove(this.ballStartMarker);

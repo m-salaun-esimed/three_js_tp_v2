@@ -62,7 +62,7 @@ template_react_vite_keycloak/
 ```
 ### GravityPuzzle
 
-Un jeu 3D ou vous pouvez influencer la gravité sur une boulle, le but est de finir les puzzle le plus rapidement ! 
+Un jeu 3D ou vous pouvez influencer la gravité sur une boulle, le but est de finir les puzzle le plus rapidement en passant par les checkpoints ! 
 
 **Caractéristiques :**
 - Moteur 3D avec Three.js et WebGPU
@@ -70,6 +70,7 @@ Un jeu 3D ou vous pouvez influencer la gravité sur une boulle, le but est de fi
 - Système de niveaux progressifs
 - Contrôles zqsdae + Souris
 - Interface de score en temps réel : temps et nombre de mouvements
+- Edition & création d'un niveau
 
 **Commandes :**
 - `zqsdae` - Change la gravité

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { FaSave, FaFolderOpen, FaTrash, FaCube, FaMapMarkerAlt, FaDoorOpen, FaMousePointer, FaUndo, FaPlay } from 'react-icons/fa';
+import { FaSave, FaFolderOpen, FaTrash, FaCube, FaMapMarkerAlt, FaDoorOpen, FaMousePointer, FaUndo, FaPlay, FaPlus, FaFlag } from 'react-icons/fa';
 import * as THREE from 'three';
 import { LevelEditor } from './utils/LevelEditor';
+import levelsData from './levels/levels.json';
 
 const GravityPuzzleEditor = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -12,7 +13,7 @@ const GravityPuzzleEditor = () => {
   const animationFrameRef = useRef<number | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [mode, setMode] = useState<'select' | 'wall' | 'spawn' | 'exit'>('select');
+  const [mode, setMode] = useState<'select' | 'wall' | 'spawn' | 'exit' | 'checkpoint'>('select');
   const [selectedObject, setSelectedObject] = useState<any>(null);
   const [placementHeight, setPlacementHeight] = useState(0);
 
@@ -52,7 +53,6 @@ const GravityPuzzleEditor = () => {
     dirLight.shadow.mapSize.height = 2048;
     scene.add(dirLight);
 
-    // Create editor
     const editor = new LevelEditor(scene, camera, renderer);
     editorRef.current = editor;
 
@@ -64,7 +64,6 @@ const GravityPuzzleEditor = () => {
       setSelectedObject(object);
     };
 
-    // Animation loop
     const animate = () => {
       animationFrameRef.current = requestAnimationFrame(animate);
 
@@ -76,7 +75,6 @@ const GravityPuzzleEditor = () => {
     };
     animate();
 
-    // Mouse event handlers
     const handleMouseMove = (e: MouseEvent) => {
       if (editorRef.current && renderer.domElement) {
         editorRef.current.handleMouseMove(e, renderer.domElement);
@@ -114,7 +112,7 @@ const GravityPuzzleEditor = () => {
     };
   }, []);
 
-  const handleModeChange = (newMode: 'select' | 'wall' | 'spawn' | 'exit') => {
+  const handleModeChange = (newMode: 'select' | 'wall' | 'spawn' | 'exit' | 'checkpoint') => {
     setMode(newMode);
     if (editorRef.current) {
       editorRef.current.setMode(newMode);
@@ -183,7 +181,6 @@ const GravityPuzzleEditor = () => {
     if (editorRef.current) {
       editorRef.current.rotateSelected(axis, Math.PI / 4);
 
-      // Force update of selected object state
       const obj = editorRef.current.getSelectedObject();
       if (obj) {
         setSelectedObject({
@@ -200,7 +197,6 @@ const GravityPuzzleEditor = () => {
     if (editorRef.current) {
       editorRef.current.scaleSelected(axis, delta);
 
-      // Force update of selected object state
       const obj = editorRef.current.getSelectedObject();
       if (obj) {
         setSelectedObject({
@@ -219,7 +215,6 @@ const GravityPuzzleEditor = () => {
       newPos[axis] = value;
       editorRef.current.setSelectedPosition(newPos.x, newPos.y, newPos.z);
 
-      // Force update of selected object state
       const obj = editorRef.current.getSelectedObject();
       if (obj) {
         setSelectedObject({
@@ -235,10 +230,9 @@ const GravityPuzzleEditor = () => {
   const handleRotationChange = (axis: 'x' | 'y' | 'z', value: number) => {
     if (editorRef.current && selectedObject) {
       const newRot = { ...selectedObject.rotation };
-      newRot[axis] = (value * Math.PI) / 180; // Convert degrees to radians
+      newRot[axis] = (value * Math.PI) / 180;
       editorRef.current.setSelectedRotation(newRot.x, newRot.y, newRot.z);
 
-      // Force update of selected object state
       const obj = editorRef.current.getSelectedObject();
       if (obj) {
         setSelectedObject({
@@ -257,7 +251,6 @@ const GravityPuzzleEditor = () => {
       newScale[axis] = value;
       editorRef.current.setSelectedScale(newScale.x, newScale.y, newScale.z);
 
-      // Force update of selected object state
       const obj = editorRef.current.getSelectedObject();
       if (obj) {
         setSelectedObject({
@@ -274,7 +267,6 @@ const GravityPuzzleEditor = () => {
     if (editorRef.current) {
       editorRef.current.moveSelected(axis, delta);
 
-      // Force update of selected object state
       const obj = editorRef.current.getSelectedObject();
       if (obj) {
         setSelectedObject({
@@ -294,15 +286,59 @@ const GravityPuzzleEditor = () => {
     }
   };
 
+  const handleAddToGame = () => {
+    if (!editorRef.current) return;
+
+    const levelData = editorRef.current.exportLevel();
+
+    console.log('Export level data:', levelData);
+    console.log('Checkpoints:', levelData.checkpoints);
+
+    const formattedLevelData: any = {
+      ballStart: levelData.ballStart,
+      exit: levelData.exit,
+      walls: levelData.walls.map(wall => ({
+        position: wall.position,
+        size: wall.size
+      }))
+    };
+
+    // Add checkpoints if they exist
+    if (levelData.checkpoints && levelData.checkpoints.length > 0) {
+      formattedLevelData.checkpoints = levelData.checkpoints;
+      console.log('Adding checkpoints to formatted data:', formattedLevelData.checkpoints);
+    } else {
+      console.log('No checkpoints found');
+    }
+
+    const levelNumbers = Object.keys(levelsData).map(Number);
+    const nextLevelNumber = Math.max(...levelNumbers) + 1;
+
+    const updatedLevels = {
+      ...levelsData,
+      [nextLevelNumber]: formattedLevelData
+    };
+
+    const jsonContent = JSON.stringify(updatedLevels, null, 2);
+
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'levels.json';
+    link.click();
+    URL.revokeObjectURL(url);
+
+    alert(`Niveau ${nextLevelNumber} créé! Remplacez le fichier src/games/gravity-puzzle/levels/levels.json avec le fichier téléchargé.`);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex flex-col">
-      {/* Toolbar */}
       <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-bold text-white">Éditeur de Niveau</h1>
 
-            {/* Mode buttons */}
             <div className="flex gap-2">
               <button
                 onClick={() => handleModeChange('select')}
@@ -348,10 +384,20 @@ const GravityPuzzleEditor = () => {
                 <FaDoorOpen />
                 <span>Sortie</span>
               </button>
+              <button
+                onClick={() => handleModeChange('checkpoint')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  mode === 'checkpoint'
+                    ? 'bg-cyan-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                <FaFlag />
+                <span>Checkpoint</span>
+              </button>
             </div>
           </div>
 
-          {/* File actions */}
           <div className="flex gap-2">
             <button
               onClick={handleImport}
@@ -368,6 +414,14 @@ const GravityPuzzleEditor = () => {
               <span>Sauvegarder</span>
             </button>
             <button
+              onClick={handleAddToGame}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+              title="Ajoute le niveau à levels.json pour pouvoir y jouer"
+            >
+              <FaPlus />
+              <span>Ajouter au jeu</span>
+            </button>
+            <button
               onClick={handleClear}
               className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
             >
@@ -379,7 +433,6 @@ const GravityPuzzleEditor = () => {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* 3D Canvas */}
         <div className="flex-1 relative" ref={containerRef}>
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-50">
@@ -390,7 +443,6 @@ const GravityPuzzleEditor = () => {
             </div>
           )}
 
-          {/* Controls overlay */}
           <div className="absolute bottom-4 left-4 bg-black bg-opacity-70 rounded-lg px-4 py-3 text-white text-sm">
             <div className="font-bold mb-2">Contrôles :</div>
             <ul className="space-y-1">
@@ -401,11 +453,9 @@ const GravityPuzzleEditor = () => {
           </div>
         </div>
 
-        {/* Properties Panel */}
         <div className="w-80 bg-gray-800 border-l border-gray-700 p-4 overflow-y-auto">
           <h2 className="text-xl font-bold text-white mb-4">Propriétés</h2>
 
-          {/* Placement Height Control (visible when not in select mode) */}
           {mode !== 'select' && (
             <div className="mb-4 bg-gray-700 rounded-lg p-4">
               <div className="text-sm text-gray-400 mb-2">Hauteur de placement</div>
@@ -442,7 +492,6 @@ const GravityPuzzleEditor = () => {
                 <div className="text-white font-bold capitalize">{selectedObject.type}</div>
               </div>
 
-              {/* Position Controls */}
               <div className="bg-gray-700 rounded-lg p-4">
                 <div className="text-sm text-gray-400 mb-3">Position</div>
                 <div className="space-y-2">
@@ -473,7 +522,6 @@ const GravityPuzzleEditor = () => {
                 </div>
               </div>
 
-              {/* Scale Controls (walls only) */}
               {selectedObject.type === 'wall' && (
                 <div className="bg-gray-700 rounded-lg p-4">
                   <div className="text-sm text-gray-400 mb-3">Échelle (taille)</div>

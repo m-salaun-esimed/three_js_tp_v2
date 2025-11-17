@@ -203,6 +203,23 @@ export class GravityGame {
   private checkWinCondition() {
     if (!this.ball || !this.ballBody) return;
 
+    // Check checkpoints
+    const checkpoints = this.levelManager.getCheckpoints();
+    checkpoints.forEach((checkpoint, index) => {
+      const cpPos = checkpoint.position;
+      const ballPos = this.ballBody!.position;
+      const distance = Math.sqrt(
+        Math.pow(ballPos.x - cpPos.x, 2) +
+        Math.pow(ballPos.y - cpPos.y, 2) +
+        Math.pow(ballPos.z - cpPos.z, 2)
+      );
+
+      if (distance < 1.2 && !checkpoint.userData.activated) {
+        this.levelManager.activateCheckpoint(index);
+        console.log(`Checkpoint ${index + 1} activé !`);
+      }
+    });
+
     const exitPos = this.levelManager.getExitPosition();
     if (!exitPos) return;
 
@@ -214,9 +231,14 @@ export class GravityGame {
     );
 
     if (distance < 1) {
-      console.log('Niveau complété !');
-      if (this.onLevelComplete) {
-        this.onLevelComplete();
+      // Check if all checkpoints are activated
+      if (this.levelManager.areAllCheckpointsActivated()) {
+        console.log('Niveau complété !');
+        if (this.onLevelComplete) {
+          this.onLevelComplete();
+        }
+      } else {
+        console.log('Vous devez passer par tous les checkpoints avant de terminer !');
       }
     }
   }
